@@ -1,13 +1,16 @@
 const express = require("express");
 const morgan = require("morgan");
 const session = require("express-session");
-const path = require('path');
+const path = require("path");
+
+const configs = require("./configs");
+const indexRouter = require("./routes");
 
 const app = express();
 
 app.use(
   session({
-    secret: "session secret",
+    secret: configs.SESSION_SECRET_KEY,
     resave: false,
     saveUninitialized: true,
   })
@@ -20,7 +23,9 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(morgan("dev"));
+configs.NODE_ENV !== "production" && app.use(morgan("dev"));
+
+app.use("/", indexRouter);
 
 app.use((req, res, next) => {
   const err = new Error("Not Found");
@@ -29,6 +34,7 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
+  console.log(err);
   const statusCode = err.status || 500;
   let message = err.message || "Internal Server Error";
 
@@ -37,6 +43,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message });
 });
 
-const PORT = 8010;
+const PORT = parseInt(configs.SERVER_PORT);
 
 app.listen(PORT, () => console.info(`server listening on port ${PORT} ...`));
