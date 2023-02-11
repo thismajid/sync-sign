@@ -11,10 +11,18 @@ const postLogin = async (req, res, next) => {
     return res.status(404).json({ message: "Invalid email and password" });
 
   req.session.user = email;
-  return res.redirect("/");
+  res.redirect("/");
+};
+
+const logout = async (req, res, next) => {
+  if (!req.session.user) return res.redirect("/");
+
+  req.session.destroy();
+  res.redirect("/");
 };
 
 module.exports = {
   getLogin,
   postLogin,
+  logout,
 };
